@@ -1,45 +1,37 @@
-.PHONY: build deploy remove help echo
-default: build
+.PHONY: deploy remove help echo
+default: deploy
 
 BRANCH = $(shell git symbolic-ref --short HEAD | cut -c1-10)
 TICKET_NUMBER = $(shell echo $(BRANCH) | cut -c7- )
 
 ifeq ($(BRANCH),master)
-	STAGE = prod
-	PREFIX = hello-prod
+	STAGE = hello-prod
+	ENV = prod
 else ifeq ($(BRANCH),release)
-	STAGE = qa
-	PREFIX = hello-qa
+	STAGE = hello-qa
+	ENV = qa
 else ifeq ($(BRANCH),develop)
-	STAGE = develop
-	PREFIX = hello-dev
+	STAGE = hello-develop
+	ENV = develop
 else
-	STAGE = dev
-	PREFIX = "hello-$(TICKET_NUMBER)"
+	STAGE = "hello-$(TICKET_NUMBER)"
+	ENV = dev
 endif
 
-##
-### Docker targets
-##
-build:
-	npm install
-
-deploy: build echo ## Deploy Serverless Service
+deploy: echo ## Deploy Serverless Service
 	serverless deploy \
 		--verbose \
-		--stage $(PREFIX) \
-		--file $(STAGE) \
-		--prefix $(PREFIX) \
+		--stage $(STAGE) \
+		--env $(ENV) \
 
-remove: build ## Remove resources
+remove: echo ## Remove resources
 	serverless remove \
 		--verbose \
-		--stage $(PREFIX) \
-		--file $(STAGE)
-		--prefix $(PREFIX) \
+		--stage $(STAGE) \
+		--env $(STAGE)
 
 echo: ## Helpful way to see the makefile variables
 	@printf "Stage: $(STAGE)\n"
-	@printf "Prefix: $(PREFIX)\n"
+	@printf "Env: $(ENV)\n"
 	@printf "Branch: $(BRANCH)\n"
-	
+	@printf "Ticket Number: $(TICKET_NUMBER)\n"

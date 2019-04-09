@@ -1,10 +1,10 @@
 service: hello-crud
 
 provider:
-  stackName: "${self:custom.prefix}-${self:service}"
+  stackName: "${self:custom.stage}-${self:service}"
   runtime: nodejs8.10
   name: aws
-  stage: ${self:custom.prefix}
+  stage: ${self:custom.stage}
   deploymentBucket:
     name: ${self:custom.env.bucketName}
   apiGateway:
@@ -14,7 +14,7 @@ provider:
 functions:
   HelloRead:
     handler: handler.hello
-    name: "${self:custom.prefix}-get"
+    name: "${self:custom.stage}-get"
     description: Get the current calculator state
     memorySize: 128
     timeout: 5
@@ -31,9 +31,9 @@ resources:
         DeploymentId:
           Ref: ApiGatewayDeployment
         RestApiId: ${self:custom.env.restApiId}
-        StageName: ${self:custom.prefix}
+        StageName: ${self:custom.stage}
         Variables:
-          getHelloFunction: "${self:custom.prefix}-get"
+          getHelloFunction: "${self:custom.stage}-get"
     ReadFunctionPermission:
       Type: AWS::Lambda::Permission
       Properties:
@@ -50,5 +50,5 @@ resources:
               - ${self:custom.env.restApiId}/*/GET/hello
 
 custom:
-  env: ${file(./${opt:file}.yml)}
-  prefix: ${opt:prefix, 'calcs-test'}
+  env: ${file(./${opt:env}.yml)}
+  stage: ${opt:stage, 'hello-test'}
