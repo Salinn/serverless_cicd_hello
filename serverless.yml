@@ -7,9 +7,6 @@ provider:
   stage: ${self:custom.stage}
   deploymentBucket:
     name: ${self:custom.env.bucketName}
-  apiGateway:
-    restApiId: ${self:custom.env.restApiId}
-    restApiRootResourceId: ${self:custom.env.restApiRootResourceId}
 
 functions:
   HelloRead:
