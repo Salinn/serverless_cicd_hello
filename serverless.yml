@@ -1,18 +1,18 @@
-service: hello-crud
+service: hello-world-lambdas
 
 provider:
-  stackName: "${self:custom.stage}-${self:service}"
-  runtime: nodejs8.10
   name: aws
+  runtime: nodejs12.x
+  stackName: "${self:service}-${self:custom.stage}"
   stage: ${self:custom.stage}
   deploymentBucket:
-    name: ${self:custom.env.bucketName}
+    name: 'hello-salinn-serverless-deployments'
 
 functions:
-  HelloRead:
-    handler: handler.hello
-    name: "${self:custom.stage}-get"
-    description: Get the current calculator state
+  Hello:
+    handler: src/hello.handler
+    name: "hello-${self:custom.stage}"
+    description: Say hello to the world or a person
     memorySize: 128
     timeout: 5
 
@@ -21,31 +21,31 @@ resources:
     ApiGatewayDeployment:
       Type: AWS::ApiGateway::Deployment
       Properties:
-        RestApiId: ${self:custom.env.restApiId}
+        RestApiId: ${self:custom.restApiId}
     ApiGatewayStage:
       Type: AWS::ApiGateway::Stage
       Properties:
         DeploymentId:
           Ref: ApiGatewayDeployment
-        RestApiId: ${self:custom.env.restApiId}
+        RestApiId: ${self:custom.restApiId}
         StageName: ${self:custom.stage}
         Variables:
-          getHelloFunction: "${self:custom.stage}-get"
-    ReadFunctionPermission:
+          helloFunction: "hello-${self:custom.stage}"
+    HelloLambdaPermission:
       Type: AWS::Lambda::Permission
       Properties:
         Action: lambda:InvokeFunction
         FunctionName: 
-          Ref: HelloReadLambdaFunction
+          Ref: HelloLambdaFunction
         Principal: apigateway.amazonaws.com
-        SourceArn: 
-          !Join
-            - ':'
-            - - 'arn:aws:execute-api'
-              - Ref: 'AWS::Region'
-              - Ref: 'AWS::AccountId'
-              - ${self:custom.env.restApiId}/*/GET/hello
+        SourceArn: ${self:custom.apiGatewayHelloFunctionArn}
 
 custom:
-  env: ${file(./${opt:env}.yml)}
-  stage: ${opt:stage, 'hello-test'}
+  stage: ${opt:stage, 'recipe-fb'}
+  apiGatewayStage: ${opt:apiGatewayStage, ${self:custom.stage}}
+  restApiId: 
+    Fn::ImportValue:
+      Fn::Sub: "hello-gateway-${self:custom.apiGatewayStage}-restApiId"
+  apiGatewayHelloFunctionArn: 
+    Fn::ImportValue:
+      Fn::Sub: "hello-gateway-${self:custom.apiGatewayStage}-hello-function-arn"
