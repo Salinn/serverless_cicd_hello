@@ -6,13 +6,13 @@ TICKET_NUMBER = $(shell echo $(BRANCH) | cut -c7-10 )
 
 ifeq ($(BRANCH),master)
 	STAGE = prod
-	ENV = prod
+	API_GATEWAY_STAGE = "prod"
 else ifeq ($(BRANCH),develop)
 	STAGE = dev
-	ENV = dev
+	API_GATEWAY_STAGE = "dev"
 else
 	STAGE = "$(TICKET_NUMBER)"
-	ENV = fb
+	API_GATEWAY_STAGE = "dev"
 endif
 
 
@@ -23,7 +23,7 @@ deploy: echo## Deploy Serverless Service
 	serverless deploy \
 		--verbose \
 		--stage $(STAGE) \
-		--env $(ENV) 
+		--apiGatewayStage $(API_GATEWAY_STAGE) 
 
 remove: echo ## Remove resources
 	serverless remove \
@@ -33,6 +33,6 @@ remove: echo ## Remove resources
 
 echo: ## Helpful way to see the makefile variables
 	@printf "Stage: $(STAGE)\n"
-	@printf "Env: $(ENV)\n"
+	@printf "API_GATEWAY_STAGE: $(API_GATEWAY_STAGE)\n"
 	@printf "Branch: $(BRANCH)\n"
 	@printf "Ticket Number: $(TICKET_NUMBER)\n"

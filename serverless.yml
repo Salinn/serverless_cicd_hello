@@ -42,9 +42,10 @@ resources:
 
 custom:
   stage: ${opt:stage, 'recipe-fb'}
+  apiGatewayStage: ${opt:apiGatewayStage, ${self:custom.stage}}
   restApiId: 
     Fn::ImportValue:
-      Fn::Sub: "hello-gateway-${self:custom.stage}-restApiId"
+      Fn::Sub: "hello-gateway-${self:custom.apiGatewayStage}-restApiId"
   apiGatewayHelloFunctionArn: 
     Fn::ImportValue:
-      Fn::Sub: "hello-gateway-${self:custom.stage}-hello-function-arn"
+      Fn::Sub: "hello-gateway-${self:custom.apiGatewayStage}-hello-function-arn"
